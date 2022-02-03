@@ -15,6 +15,8 @@ class CreateMarcasTable extends Migration
     {
         Schema::create('marcas', function (Blueprint $table) {
             $table->id();
+            $table->string('nome',50)->unique();
+            $table->string('imagem',100)->comment('Logo da Marca');
             $table->timestamps();
         });
     }

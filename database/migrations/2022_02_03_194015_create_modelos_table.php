@@ -15,6 +15,13 @@ class CreateModelosTable extends Migration
     {
         Schema::create('modelos', function (Blueprint $table) {
             $table->id();
+            $table->string('nome',30);
+            $table->string('imagem',100);
+            $table->integer('numero_portas');
+            $table->integer('lugares');
+            $table->boolean('air_bag');
+            $table->boolean('abs');
+            $table->foreignId('marca_id')->constrained('marcas')->onDelete('cascade');
             $table->timestamps();
         });
     }
