@@ -33,7 +33,16 @@ class MarcaController extends Controller
      */
     public function store(MarcaStoreRequest $request)
     {
-        $marca = $this->marca->create($request->all());
+        // Gravar a foto e pegando o caminho onde ela foi salva.
+        $imagem = $request->file('imagem');
+        $path = "imagens/marcas/$request->nome";
+        $retorno = $imagem->store($path,'public');
+
+        $marca = $this->marca->create([
+            'nome'   => $request->nome,
+            'imagem' => $retorno
+        ]);
+
         return response()->json([$marca], 201);
     }
 

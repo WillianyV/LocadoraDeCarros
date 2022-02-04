@@ -25,7 +25,7 @@ class MarcaStoreRequest extends FormRequest
     {
         return [
             'nome'   => 'bail|required|max:50|unique:marcas',
-            'imagem' => 'bail|required|max:100',
+            'imagem' => 'bail|required|image|mimes:png|max:100',
         ];
     }
 }
