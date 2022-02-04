@@ -66,8 +66,23 @@ class MarcaController extends Controller
             return response()->json(['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe.'], 404);
         }
 
-        // Validando os dados através do modelo
-        $request->validate($marca->rules(), $marca->feedback());
+        if($request->method() === 'PATCH'){
+            /**
+             * quando quero atualizar só algumas coisas utiliza-se o PATCH,
+             * quando quero atualizar todos os dados é PUT
+             */
+            $regrasDinamicas = array();
+            foreach ($marca->rules() as $input => $regra) {
+                if (array_key_exists($input, $request->all())) {
+                    $regrasDinamicas[$input] = $regra;
+                }
+            }
+            // Validando os dados através do modelo
+            $request->validate($regrasDinamicas, $marca->feedback());
+        }else{
+            // Validando os dados através do modelo
+            $request->validate($marca->rules(), $marca->feedback());
+        }
 
         $marca->update($request->all());
         return response()->json($marca, 200);
