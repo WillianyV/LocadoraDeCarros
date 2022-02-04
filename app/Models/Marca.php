@@ -16,7 +16,7 @@ class Marca extends Model
     {
         return [
             'nome'   => "bail|required|max:50|unique:marcas,nome,$this->id",
-            'imagem' => 'bail|required|max:100',
+            'imagem' => 'bail|required|image|mimes:png|max:100',
         ];
     }
 
@@ -26,7 +26,8 @@ class Marca extends Model
             'required'    => 'O campo :attribute é obrigatório',
             'nome.unique' => 'O nome da marca já existe',
             'nome.max'    => 'O nome pode ter no máximo 50 caracteres',
-            'imagem.max'    => 'A imagem pode ter no máximo 100 caracteres',
+            'imagem.max'  => 'A imagem pode ter no máximo 100 caracteres',
+            'imagem.mimes'=> 'A imagem só pode ser do tipo pnj.',
         ];
     }
 
