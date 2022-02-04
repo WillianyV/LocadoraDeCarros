@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\MarcaStoreRequest;
 use App\Models\Marca;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MarcaController extends Controller
 {
@@ -34,8 +35,8 @@ class MarcaController extends Controller
     public function store(MarcaStoreRequest $request)
     {
         // Gravar a foto e pegando o caminho onde ela foi salva.
-        $imagem = $request->file('imagem');
-        $path = "imagens/marcas/$request->nome";
+        $imagem  = $request->file('imagem');
+        $path    = "imagens/marcas/$request->nome";
         $retorno = $imagem->store($path,'public');
 
         $marca = $this->marca->create([
@@ -93,7 +94,20 @@ class MarcaController extends Controller
             $request->validate($marca->rules(), $marca->feedback());
         }
 
-        $marca->update($request->all());
+        //remove o arquivo antigo, caso um novo tenha sido enviado no request
+        if ($request->file('imagem')) {
+            Storage::disk('public')->delete($marca->imagem);
+        }
+
+        // Gravar a foto e pegando o caminho onde ela foi salva.
+        $imagem  = $request->file('imagem');
+        $path    = "imagens/marcas/$request->nome";
+        $retorno = $imagem->store($path,'public');
+
+        $marca->update([
+            'nome'   => $request->nome,
+            'imagem' => $retorno
+        ]);
         return response()->json($marca, 200);
     }
 
@@ -109,6 +123,7 @@ class MarcaController extends Controller
         if ($marca === null) {
             return response()->json(['erro' => 'Impossível realizar a exclusão. O recurso solicitado não existe.'], 404);
         }
+        Storage::disk('public')->delete($marca->imagem);
         $marca->delete();
         return response()->json(['msg' => 'A marca foi removida com sucesso.'], 200);
     }
