@@ -23,4 +23,10 @@ class Modelo extends Model
             'marca_id'      => 'bail|required|exists:marcas,id',
         ];
     }
+
+    public function marca()
+    {
+        //UM modelo PERTENCE a UMA marca
+        return $this->belongsTo(Marca::class);
+    }
 }
