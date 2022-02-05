@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CarroStoreRequest;
 use App\Models\Carro;
 use Illuminate\Http\Request;
 
 class CarroController extends Controller
 {
+    // injeção do model
+    public function __construct(Carro $carro)
+    {
+        $this->carro = $carro;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,51 +21,98 @@ class CarroController extends Controller
      */
     public function index()
     {
-        //
+        $carros = $this->carro->all();
+        return response()->json($carros, 200);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\CarroStoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CarroStoreRequest $request)
     {
-        //
+        $carro = $this->carro->create([
+            'placa'      => strtoupper($request->placa),
+            'disponivel' => $request->disponivel,
+            'km'         => $request->km,
+            'modelo_id'  => $request->modelo_id,
+        ]);
+
+        return response()->json([$carro], 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Carro  $carro
+     * @param  Integer
      * @return \Illuminate\Http\Response
      */
-    public function show(Carro $carro)
+    public function show($id)
     {
-        //
+        $carro = $this->carro->find($id);
+        if ($carro === null) {
+            return response()->json(['erro' => 'Recurso pesquisando não existe.'], 404);
+        }
+        return response()->json($carro, 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Carro  $carro
+     * @param  Integer
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Carro $carro)
+    public function update(Request $request, $id)
     {
-        //
+        $carro = $this->carro->find($id);
+        if ($carro === null) {
+            return response()->json(['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe.'], 404);
+        }
+
+        if($request->method() === 'PATCH'){
+            /**
+             * quando quero atualizar só algumas coisas utiliza-se o PATCH,
+             * quando quero atualizar todos os dados é PUT
+             */
+            $regrasDinamicas = array();
+            foreach ($carro->rules() as $input => $regra) {
+                if (array_key_exists($input, $request->all())) {
+                    $regrasDinamicas[$input] = $regra;
+                }
+            }
+            // Validando os dados através do modelo
+            $request->validate($regrasDinamicas);
+        }else{
+            // Validando os dados através do modelo
+            $request->validate($carro->rules());
+        }
+
+        $carro->update([
+            'placa'      => strtoupper($request->placa),
+            'disponivel' => $request->disponivel,
+            'km'         => $request->km,
+            'modelo_id'  => $request->modelo_id,
+        ]);
+        return response()->json($carro, 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Carro  $carro
+     * @param  Integer
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Carro $carro)
+    public function destroy($id)
     {
-        //
+        $carro = $this->carro->find($id);
+        if ($carro === null) {
+            return response()->json(['erro' => 'Impossível realizar a exclusão. O recurso solicitado não existe.'], 404);
+        }
+
+        $carro->delete();
+        return response()->json(['msg' => 'O carro foi removido com sucesso.'], 200);
     }
 }

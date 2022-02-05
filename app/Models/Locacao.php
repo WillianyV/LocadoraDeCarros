@@ -10,4 +10,6 @@ class Locacao extends Model
     use HasFactory;
 
     protected $table = 'locacoes';
+    protected $fillable = ['data_inicio_periodo', 'data_final_previsto_periodo', 'data_final_realizado_periodo', 'valor_diaria', 'km_inicial', 'km_final', 'cliente_id', 'carro_id'];
+
 }
