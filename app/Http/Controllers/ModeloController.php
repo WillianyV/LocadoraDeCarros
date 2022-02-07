@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ModeloStoreRequest;
 use App\Models\Modelo;
+use App\Repositories\ModeloRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,28 +23,25 @@ class ModeloController extends Controller
      */
     public function index(Request $request)
     {
-        if($request->has('atributos_marcas')){
-            $atributos_marcas = $request->atributos_marcas;
-            $modelos = $this->modelo->with("marca:$atributos_marcas");
+        $modeloRepositorio = new ModeloRepository($this->modelo);
+       
+        if($request->has('atributos_marcas')){        
+            $atributos_marcas = "marca:id,$request->atributos_marcas"; 
+            $modeloRepositorio->selectAtributosRegistrosRelacionados($atributos_marcas);
         }else{
-            $modelos = $this->modelo->with('marca');
+            $modeloRepositorio->selectAtributosRegistrosRelacionados('marca');            
         }
 
         if($request->has('pesquisa')){
-            $filtros = explode(';', $request->pesquisa);
-            foreach ($filtros as $filtro) {
-                $pesquisa = explode(':', $filtro);
-                $modelos = $modelos->where($pesquisa[0],$pesquisa[1],$pesquisa[2]);   
-            }                     
+            $modeloRepositorio->pesquisa($request->pesquisa);
         }
 
         if($request->has('atributos')){
-            $atributos = $request->atributos; //"id,nome,imagem,marca_id" o selectRaw seleciona uma string inteira
-            $modelos = $modelos->selectRaw($atributos)->get();
-        }else{
-            $modelos = $modelos->get();
+            $modeloRepositorio->selectAtributos($request->atributos);
         }
         
+        $modelos = $modeloRepositorio->getResultado();
+
         return response()->json($modelos, 200);
     }
 
