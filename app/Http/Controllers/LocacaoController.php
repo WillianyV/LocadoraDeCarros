@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LocacaoStoreUpdateRequest;
 use App\Models\Locacao;
+use App\Repositories\LocacaoRepository;
 use Illuminate\Http\Request;
 
 class LocacaoController extends Controller
@@ -19,9 +20,20 @@ class LocacaoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $locacoes = $this->locacao->all();
+        $locacaoRepositorio = new LocacaoRepository($this->locacao);
+
+        if($request->has('pesquisa')){
+            $locacaoRepositorio->pesquisa($request->pesquisa);
+        }
+
+        if($request->has('atributos')){
+            $locacaoRepositorio->selectAtributos($request->atributos);
+        }
+        
+        $locacoes = $locacaoRepositorio->getResultado();
+
         return response()->json($locacoes, 200);
     }
 
