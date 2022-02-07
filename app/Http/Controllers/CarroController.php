@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CarroStoreRequest;
 use App\Models\Carro;
+use App\Repositories\CarroRepository;
 use Illuminate\Http\Request;
 
 class CarroController extends Controller
@@ -19,9 +20,27 @@ class CarroController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $carros = $this->carro->all();
+        $carroRepositorio = new CarroRepository($this->carro);
+
+        if($request->has('atributos_modelos')){        
+            $atributos_modelos = "modelo:id,marca_id,$request->atributos_modelos"; 
+            $carroRepositorio->selectAtributosRegistrosRelacionados($atributos_modelos);
+        }else{
+            $carroRepositorio->selectAtributosRegistrosRelacionados('modelo');            
+        }
+
+        if($request->has('pesquisa')){
+            $carroRepositorio->pesquisa($request->pesquisa);
+        }
+
+        if($request->has('atributos')){
+            $carroRepositorio->selectAtributos($request->atributos);
+        }
+        
+        $carros = $carroRepositorio->getResultado();
+
         return response()->json($carros, 200);
     }
 
@@ -51,7 +70,7 @@ class CarroController extends Controller
      */
     public function show($id)
     {
-        $carro = $this->carro->find($id);
+        $carro = $this->carro->with('modelo')->find($id);
         if ($carro === null) {
             return response()->json(['erro' => 'Recurso pesquisando não existe.'], 404);
         }

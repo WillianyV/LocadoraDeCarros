@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ClienteStoreUpdateRequest;
 use App\Models\Cliente;
+use App\Repositories\ClienteRepository;
 use Illuminate\Http\Request;
 
 class ClienteController extends Controller
@@ -19,9 +20,20 @@ class ClienteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clientes = $this->cliente->all();
+        $clienteRepositorio = new ClienteRepository($this->cliente);
+
+        if($request->has('pesquisa')){
+            $clienteRepositorio->pesquisa($request->pesquisa);
+        }
+
+        if($request->has('atributos')){
+            $clienteRepositorio->selectAtributos($request->atributos);
+        }
+        
+        $clientes = $clienteRepositorio->getResultado();
+        
         return response()->json($clientes, 200);
     }
 

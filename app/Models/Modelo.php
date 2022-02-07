@@ -29,4 +29,10 @@ class Modelo extends Model
         //UM modelo PERTENCE a UMA marca
         return $this->belongsTo(Marca::class);
     }
+
+    public function carro()
+    {
+        //UM modelo POSSUI MUITOS carros
+        return $this->hasMany(Carro::class);
+    }
 }

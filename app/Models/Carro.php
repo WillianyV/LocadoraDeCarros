@@ -21,4 +21,14 @@ class Carro extends Model
             'modelo_id'  => 'bail|required|exists:modelos,id',
         ];
     }
+
+    public function modelo()
+    {
+        //UM carro PERTENCE a UM modelo
+        return $this->belongsTo(Modelo::class);
+    }
+
+    public function clientes(){
+        return $this->belongsToMany(Cliente::class, 'locacao','carro_id','cliente_id')->withTimestamps();   
+    }
 }
