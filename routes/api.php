@@ -14,12 +14,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::prefix('v1')->middleware('jwt.auth')->group(function(){
+    Route::ApiResource('carro'  , 'App\Http\Controllers\CarroController');
+    Route::ApiResource('cliente', 'App\Http\Controllers\ClienteController');
+    Route::ApiResource('locacao', 'App\Http\Controllers\LocacaoController');
+    Route::ApiResource('marca'  , 'App\Http\Controllers\MarcaController');
+    Route::ApiResource('modelo' , 'App\Http\Controllers\ModeloController');
+
+    // Auth Controller
+    Route::post('logout' , 'App\Http\Controllers\Auth\AuthController@logout');
+    Route::post('refresh', 'App\Http\Controllers\Auth\AuthController@refresh');
+    Route::post('me'     , 'App\Http\Controllers\Auth\AuthController@me');
 });
 
-Route::ApiResource('carro'  , 'App\Http\Controllers\CarroController');
-Route::ApiResource('cliente', 'App\Http\Controllers\ClienteController');
-Route::ApiResource('locacao', 'App\Http\Controllers\LocacaoController');
-Route::ApiResource('marca'  , 'App\Http\Controllers\MarcaController');
-Route::ApiResource('modelo' , 'App\Http\Controllers\ModeloController');
+Route::post('login'  , 'App\Http\Controllers\Auth\AuthController@login');
+
