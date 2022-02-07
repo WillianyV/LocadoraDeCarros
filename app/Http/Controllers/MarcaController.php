@@ -36,11 +36,12 @@ class MarcaController extends Controller
     {
         // Gravar a foto e pegando o caminho onde ela foi salva.
         $imagem  = $request->file('imagem');
-        $path    = "imagens/marcas/$request->nome";
+        $folder  = str_replace([' ', '-'], '_', mb_strtoupper($request->nome, 'UTF-8'));
+        $path    = "imagens/marcas/$folder";
         $retorno = $imagem->store($path,'public');
 
         $marca = $this->marca->create([
-            'nome'   => $request->nome,
+            'nome'   => mb_strtoupper($request->nome, 'UTF-8'),
             'imagem' => $retorno
         ]);
 
@@ -94,20 +95,28 @@ class MarcaController extends Controller
             $request->validate($marca->rules(), $marca->feedback());
         }
 
+        // preencher o objeto $marca com os dados enviados
+        // se tiver algum que não foi ele não atualiza
+        $marca->fill($request->all());
+
         //remove o arquivo antigo, caso um novo tenha sido enviado no request
         if ($request->file('imagem')) {
+            //remove a imagem anterior
             Storage::disk('public')->delete($marca->imagem);
+
+            // Gravar a foto e pegando o caminho onde ela foi salva.
+            $imagem  = $request->file('imagem');
+            $folder  = str_replace([' ', '-'], '_', mb_strtoupper($request->nome, 'UTF-8'));
+            $path    = "imagens/marcas/ $folder";
+            $retorno = $imagem->store($path,'public');
+
+            //insere o novo caminho da imagem
+            $marca->imagem = $retorno;
         }
+        
+        //atualiza se tiver ID, se não tiver cria um novo
+        $marca->save();
 
-        // Gravar a foto e pegando o caminho onde ela foi salva.
-        $imagem  = $request->file('imagem');
-        $path    = "imagens/marcas/$request->nome";
-        $retorno = $imagem->store($path,'public');
-
-        $marca->update([
-            'nome'   => $request->nome,
-            'imagem' => $retorno
-        ]);
         return response()->json($marca, 200);
     }
 

@@ -100,28 +100,28 @@ class ModeloController extends Controller
             $request->validate($modelo->rules());
         }
 
+        // preencher o objeto $marca com os dados enviados
+        // se tiver algum que não foi ele não atualiza
+        $modelo->fill($request->all());
+
         //remove o arquivo antigo, caso um novo tenha sido enviado no request
         if ($request->file('imagem')) {
             Storage::disk('public')->delete($modelo->imagem);
-        }
 
-        // Gravar a foto e pegando o caminho onde ela foi salva.
-        $imagem_rtn  = $request->file('imagem');
+            $imagem_rtn  = $request->file('imagem');
        
-        $folder  = str_replace([' ', '-'], '_', mb_strtoupper($request->nome, 'UTF-8'));
-        $path    = "imagens/modelos/$folder";
-        
-        $retorno = $imagem_rtn->store($path,'public');
+            $folder  = str_replace([' ', '-'], '_', mb_strtoupper($request->nome, 'UTF-8'));
+            $path    = "imagens/modelos/$folder";
+            
+            $retorno = $imagem_rtn->store($path,'public');
 
-        $modelo->update([
-            'nome'          => mb_strtoupper($request->nome, 'UTF-8'),
-            'imagem'        => $retorno,
-            'numero_portas' => $request->numero_portas,
-            'lugares'       => $request->lugares,
-            'air_bag'       => $request->air_bag,
-            'abs'           => $request->abs,
-            'marca_id'      => $request->marca_id,
-        ]);
+            //insere o novo caminho da imagem
+            $modelo->imagem = $retorno;
+        }
+        
+        //atualiza se tiver ID, se não tiver cria um novo
+        $modelo->save();
+
         return response()->json($modelo, 200);
     }
 
