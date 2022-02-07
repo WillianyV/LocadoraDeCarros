@@ -72,6 +72,10 @@ class CarroController extends Controller
             return response()->json(['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe.'], 404);
         }
 
+        // preencher o objeto $marca com os dados enviados
+        // se tiver algum que não foi ele não atualiza
+        $carro->fill($request->all());
+
         if($request->method() === 'PATCH'){
             /**
              * quando quero atualizar só algumas coisas utiliza-se o PATCH,
@@ -90,12 +94,9 @@ class CarroController extends Controller
             $request->validate($carro->rules());
         }
 
-        $carro->update([
-            'placa'      => strtoupper($request->placa),
-            'disponivel' => $request->disponivel,
-            'km'         => $request->km,
-            'modelo_id'  => $request->modelo_id,
-        ]);
+        //atualiza se tiver ID, se não tiver cria um novo
+        $carro->save();
+        
         return response()->json($carro, 200);
     }
 

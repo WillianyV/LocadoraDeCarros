@@ -65,27 +65,42 @@ class LocacaoController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\LocacaoStoreUpdateRequest  $request
+     * @param  \Illuminate\Http\Request $request
      * @param  Integer
      * @return \Illuminate\Http\Response
      */
-    public function update(LocacaoStoreUpdateRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $locacao = $this->locacao->find($id);
         if ($locacao === null) {
             return response()->json(['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe.'], 404);
         }
 
-        $locacao->update([
-            'data_inicio_periodo'          => $request->data_inicio_periodo,
-            'data_final_previsto_periodo'  => $request->data_final_previsto_periodo,
-            'data_final_realizado_periodo' => $request->data_final_realizado_periodo,
-            'valor_diaria' => $request->valor_diaria,
-            'km_inicial'   => $request->km_inicial,
-            'km_final'     => $request->km_final,
-            'cliente_id'   => $request->cliente_id,
-            'carro_id'     => $request->carro_id,
-        ]);
+        // preencher o objeto $marca com os dados enviados
+        // se tiver algum que não foi ele não atualiza
+        $locacao->fill($request->all());
+
+        if($request->method() === 'PATCH'){
+            /**
+             * quando quero atualizar só algumas coisas utiliza-se o PATCH,
+             * quando quero atualizar todos os dados é PUT
+             */
+            $regrasDinamicas = array();
+            foreach ($locacao->rules() as $input => $regra) {
+                if (array_key_exists($input, $request->all())) {
+                    $regrasDinamicas[$input] = $regra;
+                }
+            }
+            // Validando os dados através do modelo
+            $request->validate($regrasDinamicas);
+        }else{
+            // Validando os dados através do modelo
+            $request->validate($locacao->rules());
+        }
+
+        //atualiza se tiver ID, se não tiver cria um novo
+        $locacao->save();
+
         return response()->json($locacao, 200);
     }
 
