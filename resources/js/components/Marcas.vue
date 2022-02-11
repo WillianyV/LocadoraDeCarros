@@ -25,7 +25,15 @@
             <!-- CARD de listage -->
             <card-component card_header="Relação de Marcas">
                 <template v-slot:conteudo>
-                    <table-component :dados="marcas" :titulos="['id', 'nome', 'imagem']"></table-component>
+                    <table-component 
+                        :dados="marcas" 
+                        :titulos="{
+                            id: {titulo: 'ID', tipo: 'text'},
+                            nome: {titulo: 'Nome', tipo: 'text'},
+                            imagem: {titulo: 'Logo', tipo: 'imagem'},
+                            created_at: {titulo: 'Data de criação', tipo: 'data'},
+                        }"
+                    ></table-component>
                 </template>
                 <template v-slot:rodape>
                     <!-- Button trigger modal -->
