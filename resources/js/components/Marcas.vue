@@ -25,7 +25,7 @@
             <!-- CARD de listage -->
             <card-component card_header="Relação de Marcas">
                 <template v-slot:conteudo>
-                    <table-component></table-component>
+                    <table-component :dados="marcas" :titulos="['id', 'nome', 'imagem']"></table-component>
                 </template>
                 <template v-slot:rodape>
                     <!-- Button trigger modal -->
@@ -88,9 +88,27 @@
                 arquivoImagem: [],
                 transacao_status: '',
                 transacao_detalhes: [],
+                marcas: [],
             }
         },
         methods:{
+            carregarLista(){
+                let config = {
+                    headers:{
+                        'Accept': 'application/json',
+                        'Authorization': this.token
+                    }
+                }
+
+                axios.get(this.url_base, config)
+                    .then(response =>{
+                        this.marcas = response.data
+                        // console.log(this.marcas)
+                    })
+                    .catch(errors => {
+                        console.log(errors)
+                    })
+            },
             carregarImagem(e){
                 this.arquivoImagem = e.target.files
             },
@@ -122,6 +140,9 @@
                         }
                     })
             }
+        },
+        mounted(){
+            this.carregarLista()
         }
         
     }
