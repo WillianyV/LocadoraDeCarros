@@ -102,8 +102,8 @@
                         if(data.token){
                             document.cookie = 'token='+data.token+';SameSite=Lax'
                         }
-                        //dar sequencia ao enviou do form
-                        e.target.submit();
+                        // dar sequencia ao enviou do form
+                        e.target.submit(); 
                     })
             },
         },

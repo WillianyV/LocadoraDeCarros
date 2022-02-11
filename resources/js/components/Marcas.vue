@@ -34,21 +34,25 @@
             </card-component>
       
             <!-- Modal -->
-            <modal-component id_modal="modalMarca" modal_title="Cadastrar Marca">                
+            <modal-component id_modal="modalMarca" modal_title="Cadastrar Marca">   
+                <template v-slot:alertas>                
+                    <alert-component tipo="success" :detalhes="transacao_detalhes" titulo="Sucesso ao cadastrar a marca"     v-if="transacao_status == 'sucesso'"></alert-component>
+                    <alert-component tipo="danger"  :detalhes="transacao_detalhes" titulo="Erro ao tentar cadastrar a marca" v-if="transacao_status == 'erro'"></alert-component>
+                </template>
+
                 <template v-slot:conteudo>
                     <div class="mb-3">
                         <input-container-component id="inputNomeMarca" titulo="Nome" nomeHelp="nomeMarcaHelp" textoHelp="Obrigatório. Informe o nome da marca.">
                             <input type="text" class="form-control" id="inputNomeMarca" aria-describedby="nomeMarcaHelp" placeholder="NOME DA MARCA" v-model="nomeMarca">
-                        </input-container-component> 
-                        {{ nomeMarca }}                           
+                        </input-container-component>                         
                     </div>
                     <div class="mb-3">
                         <input-container-component id="inputImagem" titulo="Imagem" nomeHelp="imagemHelp" textoHelp="Obrigatório. Insira o logo da marca em formato PNG.">
                             <input type="file" class="form-control" id="inputImagem" aria-describedby="imagemHelp" placeholder="Logo" @change="carregarImagem($event)">
                         </input-container-component>                            
                     </div>
-                    {{ arquivoImagem }}
                 </template>
+                
                 <template v-slot:rodape>                    
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                     <button type="button" class="btn btn-primary" @click="salvar()">Salvar</button>
@@ -81,7 +85,9 @@
             return{
                 url_base: 'http://127.0.0.1:8000/api/v1/marca',
                 nomeMarca: '',
-                arquivoImagem: '',
+                arquivoImagem: [],
+                transacao_status: '',
+                transacao_detalhes: [],
             }
         },
         methods:{
@@ -103,10 +109,17 @@
 
                 axios.post(this.url_base, formData, config)
                     .then(response => {
-                        console.log(response)
+                        this.transacao_status   = 'sucesso'
+                        this.transacao_detalhes = {
+                            mensagem: 'ID do registro: ' + response.data[0].id
+                        }
                     })
                     .catch(errors => {
-                        console.log(errors)
+                        this.transacao_status   = 'erro'
+                        this.transacao_detalhes = {
+                            mensagem: errors.response.data.message,
+                            dados: errors.response.data.errors
+                        }
                     })
             }
         }
